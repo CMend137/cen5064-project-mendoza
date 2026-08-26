@@ -1,4 +1,4 @@
-# [Your Project Name]
+# Project Name: MacroMetric
 
 <!-- CI badge: after Session 4, replace ORG/REPO and the workflow filename, then uncomment:
 ![CI](https://github.com/ORG/REPO/actions/workflows/ci.yml/badge.svg)
@@ -10,6 +10,10 @@
 
 [One paragraph: What is the system? Who is it for? What are its 3–4 core features?
 This paragraph is your approval request — see the Project Brief, Section 2.]
+
+Project Request: 
+MacroMetric is an adaptive calorie and macronutrient planning system for adults seeking to lose, maintain, or gain body weight. Users can calculate personalized calorie and macronutrient targets, record daily weight and calorie intake, and monitor their progress through weekly weight trends. 
+The system will compare actual progress with the user’s selected goal and provide transparent, rule-based recommendations for adjusting calorie targets when necessary.
 
 ## How to run
 
