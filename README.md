@@ -28,8 +28,8 @@ instructor will follow it literally on conference days.]
 
 | Tier | Responsibilities in THIS system |
 |------|--------------------------------|
-| Presentation | [what your UI layer does] |
-| Service | [what your use-case/orchestration layer does] |
+| Presentation | Utilizing Python and Streamlit, we can grab the user input and display information such as age, weight, height, etc... It should additionally present the user's calorie/macro intake, weekly trends, and recommendations based on what the user would like. Likely modules include: DashboardView, PorgressingView.|
+| Service | For the service, this is where we take the user input from MarcoMetric's UI, and begin the calculations. Meaning, if the user inputs that they are currently 150 lbs, but want to gain weight, then displays the recommendation. Likely modules: TrackingService, TargetService. |
 | Domain | [your entities and business rules] |
 | Data | [how and where data is stored] |
 
