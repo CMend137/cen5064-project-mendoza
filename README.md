@@ -31,7 +31,7 @@ instructor will follow it literally on conference days.]
 | Presentation | Utilizing Python and Streamlit, we can grab the user input and display information such as age, weight, height, etc... It should additionally present the user's calorie/macro intake, weekly trends, and recommendations based on what the user would like. Likely modules include: DashboardView, PorgressingView.|
 | Service | For the service, this is where we take the user input from MarcoMetric's UI, and begin the calculations. Meaning, if the user inputs that they are currently 150 lbs, but want to gain weight, then displays the recommendation. Likely modules: TrackingService, TargetService. |
 | Domain | This layer contains MacroMetric’s core entities and business rules. Entities may include UserProfile, FitnessGoal, MacroTargets, DailyLog, and WeightEntry. Business rules include calculating calorie and macro targets, evaluating weekly weight trends, and determining when recommendations should be generated. |
-| Data | This layer handles the storage and retrieval of user profiles, nutrition logs, weight entries, and calculated targets. Data will be stored locally using SQLite and accessed through repository modules such as ProfileRepository and TrackingRepository, keeping storage logic separate from the service and presentation layers. |
+| Data | This layer handles the storage and retrieval of user profiles, nutrition logs, weight entries, and calculated targets. MacroMetric will use JSON files for local persistence, accessed through repository modules such as ProfileRepository and TrackingRepository. This keeps file-handling logic separate from the service, domain, and presentation layers. |
 
 ### C4 — Context & Container (Session 3 studio)
 
