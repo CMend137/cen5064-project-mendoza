@@ -38,7 +38,7 @@ instructor will follow it literally on conference days.]
 ```mermaid
 %% Replace this placeholder with YOUR system's context diagram.
 flowchart TB
-    user([User]) -->|uses| system[Your System]
+    user([MacroMetric User]) -->|uses| system[MacroMetric]
     system -->|stores data in| db[(Database)]
 ```
 
