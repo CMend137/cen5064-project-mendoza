@@ -39,16 +39,16 @@ instructor will follow it literally on conference days.]
 %% Replace this placeholder with YOUR system's context diagram.
 flowchart TB
     user([MacroMetric User]) -->|uses| system[MacroMetric]
-    system -->|stores data in| db[(Database)]
+    system -->|stores data in| data[(JSON Files)]
 ```
 
 ```mermaid
 %% Container view: your containers should match the tier table above.
 flowchart TB
-    subgraph YourSystem [Your System]
-        ui[Web UI / CLI<br/>Presentation] --> api[Application / Service]
-        api --> domain[Domain Model]
-        domain --> db[(Database<br/>Data tier)]
+    subgraph MacroMetric [MacroMetric]
+        ui[Streamlit Web UI<br/>Presentation] --> service[Application     Services<br/>Service]
+       service --> domain[Domain Model]
+        domain --> data[(JSON Files<br/>Data)]
     end
 ```
 
@@ -56,27 +56,61 @@ flowchart TB
 
 ```mermaid
 %% Class diagram: your 3–4 core domain classes.
+  %% Class diagram: your 3–4 core domain classes.
 classDiagram
-    class ExampleEntity {
-        -id: Long
-        -name: String
-        +doSomething()
+    class UserProfile {
+        -age: int
+        -weightLbs: float
+        -heightInches: float
+        -activityLevel: str
+        -goal: str
+        +validate() bool
     }
+
+    class MacroTargets {
+        -dailyCalories: int
+        -proteinGrams: float
+        -carbGrams: float
+        -fatGrams: float
+        +adjustForGoal() void
+    }
+
+    class DailyLog {
+        -date: str
+        -caloriesConsumed: int
+        -proteinGrams: float
+        -carbGrams: float
+        -fatGrams: float
+        +calculateAdherence() float
+    }
+
+    class WeightEntry {
+        -date: str
+        -weightLbs: float
+        +calculateChange() float
+    }
+
+    UserProfile "1" --> "1" MacroTargets : has
+    UserProfile "1" --> "*" DailyLog : records
+    UserProfile "1" --> "*" WeightEntry : tracks
+    DailyLog --> MacroTargets : compared with
 ```
 
 ```mermaid
 %% Sequence diagram: ONE core use case, end to end.
 sequenceDiagram
-    actor U as User
-    participant UI
-    participant S as Service
-    participant D as Data
-    U->>UI: action
-    UI->>S: request
-    S->>D: save/load
-    D-->>S: result
-    S-->>UI: response
-    UI-->>U: confirmation
+    actor U as MacroMetric User
+    participant UI as DashboardView
+    participant S as TrackingService
+    participant D as JSON Repository
+
+    U->>UI: Enter daily intake and weight
+    UI->>S: Submit log data
+    S->>S: Validate log data
+    S->>D: Save DailyLog and WeightEntry
+    D-->>S: Confirm data saved
+    S-->>UI: Return updated progress
+    UI-->>U: Display confirmation and progress
 ```
 
 ## Architecture Decision Records
