@@ -2,6 +2,7 @@ import pytest
 
 from domain.target_calculator import calculate_targets
 
+
 def test_calculate_targets_maintain():
     result = calculate_targets(
         weight_kg=75,

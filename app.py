@@ -2,7 +2,6 @@ import streamlit as st
 
 from services.target_service import TargetService
 
-
 st.set_page_config(
     page_title="MacroMetric",
     page_icon="📊",

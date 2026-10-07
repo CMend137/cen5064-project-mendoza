@@ -1,5 +1,5 @@
-from domain.target_calculator import calculate_targets
 from data.target_repository import TargetRepository
+from domain.target_calculator import calculate_targets
 
 
 class TargetService:
