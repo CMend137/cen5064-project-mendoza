@@ -1,3 +1,4 @@
+
 import streamlit as st
 
 from services.target_service import TargetService
@@ -97,7 +98,12 @@ if saved_targets:
     st.divider()
     st.subheader("Last Saved Targets")
 
-    st.write(f'Calories: {saved_targets["calories"]}')
-    st.write(f'Protein: {saved_targets["protein"]} g')
-    st.write(f'Carbohydrates: {saved_targets["carbohydrates"]} g')
-    st.write(f'Fat: {saved_targets["fat"]} g')
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric("Calories", saved_targets["calories"])
+        st.metric("Protein", f'{saved_targets["protein"]} g')
+
+    with col2:
+        st.metric("Carbohydrates", f'{saved_targets["carbohydrates"]} g')
+        st.metric("Fat", f'{saved_targets["fat"]} g')
