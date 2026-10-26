@@ -4,7 +4,6 @@ import pytest
 
 from domain.target_calculator import calculate_targets
 
-
 VALID_INPUTS = {
     "weight_kg": 75,
     "height_cm": 175,
