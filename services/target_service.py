@@ -1,12 +1,12 @@
-from data.target_repository import TargetRepository
+from data.target_store import TargetStore
 from domain.target_calculator import calculate_targets
 
 
 class TargetService:
     """Coordinates target calculations and persistence."""
 
-    def __init__(self, repository=None):
-        self.repository = repository or TargetRepository()
+    def __init__(self, repository: TargetStore):
+        self.repository = repository
 
     def calculate_and_save(
         self,

@@ -1,6 +1,7 @@
 
 import streamlit as st
 
+from data.target_repository import TargetRepository
 from services.target_service import TargetService
 
 st.set_page_config(
@@ -9,7 +10,7 @@ st.set_page_config(
     layout="centered",
 )
 
-service = TargetService()
+service = TargetService(repository=TargetRepository())
 
 st.title("MacroMetric")
 st.write(
