@@ -23,7 +23,11 @@ venv/
 .DS_Store
 Thumbs.db
 
-# --- Local secrets/config (never commit credentials) ---
+# --- Local secrets/config (never commit credentials or personal health data) ---
 .env
 *.local
 data/targets.json
+data/*.db
+data/*.db-*
+data/*.sqlite
+data/*.sqlite3
