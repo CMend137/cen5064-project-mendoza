@@ -1,3 +1,4 @@
+
 """Application use cases for nutrition target calculations and history."""
 
 from data.target_store import TargetStore
@@ -9,14 +10,14 @@ class TargetService:
         self.repository = repository
 
     def calculate_and_save(self, weight_kg, height_cm, age, sex, activity_level, goal):
-        inputs = dict(
-            weight_kg=weight_kg,
-            height_cm=height_cm,
-            age=age,
-            sex=sex,
-            activity_level=activity_level,
-            goal=goal,
-        )
+        inputs = {
+            "weight_kg": weight_kg,
+            "height_cm": height_cm,
+            "age": age,
+            "sex": sex,
+            "activity_level": activity_level,
+            "goal": goal,
+        }
         targets = calculate_targets(**inputs)
         self.repository.save(targets, inputs=inputs)
         return self.repository.load()

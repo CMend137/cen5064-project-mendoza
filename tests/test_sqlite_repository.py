@@ -3,8 +3,14 @@
 from data.target_repository import TargetRepository
 from services.target_service import TargetService
 
-INPUTS = dict(weight_kg=75, height_cm=175, age=30, sex="male",
-              activity_level="moderate", goal="maintain")
+INPUTS = {
+    "weight_kg": 75,
+    "height_cm": 175,
+    "age": 30,
+    "sex": "male",
+    "activity_level": "moderate",
+    "goal": "maintain",
+}
 
 
 def test_history_persists_and_latest_result_is_loaded(tmp_path):

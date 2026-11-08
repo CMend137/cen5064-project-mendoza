@@ -9,7 +9,6 @@ from data.target_repository import TargetRepository
 from services.progress_service import ProgressService
 from services.target_service import TargetService
 
-
 st.set_page_config(page_title="MacroMetric", page_icon="📊", layout="wide")
 
 repository = TargetRepository()
@@ -135,10 +134,9 @@ with history:
                     st.error(str(error))
         confirm = st.checkbox("I understand deleting this record cannot be undone.",
                               key=f"confirm_delete_{chosen_id}")
-        if st.button("Delete selected calculation", disabled=not confirm):
-            if target_service.delete_calculation(chosen_id):
-                st.success("Record deleted.")
-                st.rerun()
+    if st.button("Delete selected calculation", disabled=not confirm) and target_service.delete_calculation(chosen_id):
+        st.success("Record deleted.")
+    st.rerun()
 
 with daily_log:
     st.subheader("Daily intake and weight")

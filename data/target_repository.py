@@ -1,7 +1,7 @@
 """SQLite persistence for MacroMetric calculations and daily progress logs."""
 
-from pathlib import Path
 import sqlite3
+from pathlib import Path
 
 
 class TargetRepository:
