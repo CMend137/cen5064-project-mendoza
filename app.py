@@ -55,6 +55,7 @@ calculator, history, daily_log, trends, recommendations = st.tabs(
 
 with calculator:
     st.subheader("Calculate daily nutrition targets")
+    st.caption("Supported inputs: 50–500 lb · 3 ft 0 in–8 ft 0 in · ages 18–100. Values outside these ranges cannot be saved.")
     with st.form("new_calculation"):
         a, b, c = st.columns(3)
         with a:
@@ -109,6 +110,7 @@ with history:
             st.warning("This legacy record has no saved input values, so it cannot be recalculated.")
         else:
             st.markdown("#### Edit and recalculate")
+            st.caption("Supported inputs: 50–500 lb · 3 ft 0 in–8 ft 0 in · ages 18–100.")
             with st.form(f"edit_calculation_{chosen_id}"):
                 x, y, z = st.columns(3)
                 with x:
@@ -162,6 +164,7 @@ with history:
 with daily_log:
     st.subheader("Daily intake and weight")
     st.write("Choose a date and save intake/weight. Re-saving an existing date edits that entry.")
+    st.caption("Supported weight: 50–500 lb. Check your units before saving.")
     with st.form("daily_progress"):
         log_date = st.date_input("Date", value=date.today())
         x, y = st.columns(2)

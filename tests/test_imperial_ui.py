@@ -44,3 +44,20 @@ def test_empty_app_save_edit_and_delete(tmp_path, monkeypatch):
     next(b for b in app.button if b.label == 'Delete selected calculation').click().run()
     assert not app.exception
     assert TargetRepository().list_records() == []
+
+
+def test_ui_displays_invalid_measurement_errors(tmp_path, monkeypatch):
+    original = TargetRepository.__init__
+    monkeypatch.setattr(TargetRepository, '__init__', lambda self: original(self, tmp_path / 'ui.db'))
+    app = AppTest.from_file('../app.py').run()
+    next(n for n in app.number_input if n.label == 'Weight (lb)').set_value(600)
+    next(n for n in app.number_input if n.label == 'Height — feet').set_value(1)
+    app.button[0].click().run()
+    assert not app.exception
+    assert '50 to 500 lb' in app.error[0].value
+    assert TargetRepository().list_records() == []
+    next(n for n in app.number_input if n.label == 'Weight (lb)').set_value(150)
+    app.button[0].click().run()
+    assert not app.exception
+    assert '3 ft 0 in to 8 ft 0 in' in app.error[0].value
+    assert TargetRepository().list_records() == []
