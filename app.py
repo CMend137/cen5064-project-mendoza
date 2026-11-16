@@ -35,22 +35,20 @@ def show_targets(targets):
 
 st.markdown("""<style>
 .stApp {background: #0b1120; color: #e6edf7;}
-.block-container {max-width: 1240px; padding-top: 2rem;}
+.block-container {max-width: 1080px; padding-top: 2rem;}
 [data-testid="stHeader"] {background: #0b1120;}
-[data-testid="stMetric"] {background: #172338; border: 1px solid #33445e;
- border-top: 3px solid #60a5fa; border-radius: 14px; padding: 18px;}
+[data-testid="stMetric"] {background: #111c2e; border: 1px solid #26354b; border-radius: 14px; padding: 18px;}
 [data-testid="stMetricLabel"] {color: #bac9dd;}
 [data-testid="stMetricValue"] {color: #f4f7fc;}
-[data-testid="stForm"] {background: #111c2e; border: 1px solid #33445e;
- border-radius: 18px; padding: 24px;}
+[data-testid="stForm"] {background: #111c2e; border: 1px solid #26354b;
+ border-radius: 18px; padding: 28px;}
 [data-baseweb="tab-list"] {gap: 8px; padding: 8px; background: #111c2e;
  border-radius: 12px; overflow-x: auto;}
 [data-baseweb="tab"] {padding: 10px 16px; border-radius: 8px; color: #c5d3e6;}
 [data-baseweb="tab"][aria-selected="true"] {background: #233c62; color: #ffffff;}
 h1, h2, h3 {letter-spacing: -0.025em;}
-.mm-hero {background: linear-gradient(115deg, #172b4d, #1c2341);
- border: 1px solid #3c5278; border-radius: 22px; padding: 30px; margin-bottom: 24px;}
-.mm-hero h1 {color: #ffffff; margin: 8px 0; font-size: clamp(2rem, 5vw, 3rem);}
+.mm-hero {padding: 4px 0 20px; margin-bottom: 0;}
+.mm-hero h1 {color: #ffffff; margin: 8px 0; font-size: clamp(1.8rem, 4vw, 2.3rem);}
 .mm-hero p {color: #c5d3e6; margin: 0;}
 .mm-eyebrow {color: #93c5fd; font-size: .8rem; font-weight: 700; letter-spacing: .16em;}
 @media (max-width: 640px) {
@@ -59,51 +57,42 @@ h1, h2, h3 {letter-spacing: -0.025em;}
 }
 </style>""", unsafe_allow_html=True)
 st.markdown("""<section class="mm-hero">
-<div class="mm-eyebrow">PLAN • TRACK • UNDERSTAND</div>
 <h1>MacroMetric</h1>
-<p>Your nutrition targets. Your daily progress. One clear view.</p>
+<p>A little clarity for your daily routine.</p>
 </section>""", unsafe_allow_html=True)
 if "notice" in st.session_state:
     st.success(st.session_state.pop("notice"))
 saved_records = target_service.list_calculations()
 latest = saved_records[0] if saved_records else {}
 st.caption(f"Saved goal: {str(latest.get('goal') or 'Not set').title()} · Measurements in lb and ft/in")
-with st.container(border=True):
-    st.subheader("Your day at a glance")
-    today_log = next((row for row in progress_service.list_daily_logs()
-                      if row["log_date"] == date.today().isoformat()), None)
-    daily_target = latest.get("calories")
-    consumed = today_log["calories"] if today_log else None
-    a, b, c = st.columns(3)
-    a.metric("Daily target", f"{daily_target:,} kcal" if daily_target else "Not set")
-    b.metric("Logged today", f"{consumed:,} kcal" if consumed is not None else "No entry")
-    if consumed is not None and daily_target:
-        remaining = daily_target - consumed
-        c.metric("Above target" if remaining < 0 else "Remaining", f"{abs(remaining):,} kcal")
-        ratio = consumed / daily_target
-        st.progress(min(max(ratio, 0.0), 1.0), text=f"{ratio:.0%} of daily calorie target logged")
-    else:
-        c.metric("Days logged this week", f"{len(progress_service.weekly_logs())} / 7")
-        st.caption("Save a target in Calculator and an entry for today in Daily Log to see your calorie progress.")
-
 calculator, history, daily_log, trends, recommendations = st.tabs(
-    ["Calculator", "Calculation History", "Daily Log", "Weekly Trends", "Recommendations"]
+    ["Calculator", "History", "Daily Log", "Trends", "Insights"]
 )
 
 with calculator:
-    st.subheader("Calculate daily nutrition targets")
-    st.caption("Supported inputs: 50–500 lb · 3 ft 0 in–8 ft 0 in · ages 18–100. Values outside these ranges cannot be saved.")
+    st.subheader("Build your daily plan")
+    st.caption("Enter your measurements, choose a goal, and we’ll calculate your targets.")
+    with st.expander("Supported measurements"):
+        st.write("Weight: 50–500 lb · Height: 3 ft–8 ft · Age: 18–100. Values outside these ranges cannot be saved.")
     with st.form("new_calculation"):
+        st.markdown("##### About you")
         a, b, c = st.columns(3)
         with a:
             weight_lb = st.number_input("Weight (lb)", min_value=1.0, value=165.0, step=0.1)
-            sex = st.selectbox("Sex", SEX_OPTIONS)
         with b:
-            height_ft = st.number_input("Height — feet", min_value=0, max_value=9, value=5)
-            height_in = st.number_input("Height — inches", min_value=0.0, max_value=11.99, value=9.0, step=0.1)
-            activity = st.selectbox("Activity level", ACTIVITY_OPTIONS, index=2)
-        with c:
             age = st.number_input("Age", min_value=1, value=25, step=1)
+        with c:
+            sex = st.selectbox("Sex", SEX_OPTIONS)
+        a, b = st.columns(2)
+        with a:
+            height_ft = st.number_input("Height — feet", min_value=0, max_value=9, value=5)
+        with b:
+            height_in = st.number_input("Height — inches", min_value=0.0, max_value=11.99, value=9.0, step=0.1)
+        st.markdown("##### Your routine & goal")
+        a, b = st.columns(2)
+        with a:
+            activity = st.selectbox("Activity level", ACTIVITY_OPTIONS, index=2)
+        with b:
             goal = st.selectbox("Fitness goal", GOAL_OPTIONS,
                                 index=GOAL_OPTIONS.index(str(latest.get("goal") or "Lose").title()))
         submitted = st.form_submit_button("Calculate and save", type="primary")
@@ -199,6 +188,25 @@ with history:
             st.rerun()
 
 with daily_log:
+    with st.container():
+        st.subheader("Your day at a glance")
+        today_log = next((row for row in progress_service.list_daily_logs()
+                          if row["log_date"] == date.today().isoformat()), None)
+        daily_target = latest.get("calories")
+        consumed = today_log["calories"] if today_log else None
+        a, b, c = st.columns(3)
+        a.metric("Daily target", f"{daily_target:,} kcal" if daily_target else "Not set")
+        b.metric("Logged today", f"{consumed:,} kcal" if consumed is not None else "No entry")
+        if consumed is not None and daily_target:
+            remaining = daily_target - consumed
+            c.metric("Above target" if remaining < 0 else "Remaining", f"{abs(remaining):,} kcal")
+            ratio = consumed / daily_target
+            st.progress(min(max(ratio, 0.0), 1.0), text=f"{ratio:.0%} of daily calorie target logged")
+        else:
+            c.metric("Days logged this week", f"{len(progress_service.weekly_logs())} / 7")
+            st.caption("Save a target in Calculator and an entry for today in Daily Log to see your calorie progress.")
+
+    st.divider()
     st.subheader("Daily intake and weight")
     st.write("Choose a date and save intake/weight. Re-saving an existing date edits that entry.")
     st.caption("Supported weight: 50–500 lb. Check your units before saving.")
