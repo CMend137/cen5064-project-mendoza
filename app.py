@@ -6,6 +6,7 @@ import pandas as pd
 import streamlit as st
 
 from data.target_repository import TargetRepository
+from domain.units import cm_to_height, height_to_cm, kg_to_pounds, pounds_to_kg
 from services.progress_service import ProgressService
 from services.target_service import TargetService
 
@@ -32,8 +33,22 @@ def show_targets(targets):
     columns[3].metric("Fat", f'{targets["fat"]} g')
 
 
+st.markdown("""<style>
+.block-container {max-width: 1200px; padding-top: 2rem;}
+[data-testid="stMetric"] {background: #edf7f5; border: 1px solid #b9ded7;
+ border-radius: 14px; padding: 18px; color: #153c36;}
+[data-testid="stMetricLabel"], [data-testid="stMetricValue"] {color: #153c36;}
+[data-testid="stForm"] {border-radius: 16px; padding: 24px;}
+h1, h2, h3 {letter-spacing: -0.025em;}
+</style>""", unsafe_allow_html=True)
 st.title("📊 MacroMetric")
 st.caption("Nutrition target planning, calculation history, and daily progress in one place.")
+st.caption("Start with Calculator, record your day in Daily Log, then explore your weekly trends.")
+if "notice" in st.session_state:
+    st.success(st.session_state.pop("notice"))
+saved_records = target_service.list_calculations()
+latest = saved_records[0] if saved_records else {}
+st.caption(f"Saved goal: {str(latest.get('goal') or 'Not set').title()} · Measurements in lb and ft/in")
 calculator, history, daily_log, trends, recommendations = st.tabs(
     ["Calculator", "Calculation History", "Daily Log", "Weekly Trends", "Recommendations"]
 )
@@ -43,22 +58,24 @@ with calculator:
     with st.form("new_calculation"):
         a, b, c = st.columns(3)
         with a:
-            weight_kg = st.number_input("Weight (kg)", min_value=1.0, value=75.0, step=0.1)
+            weight_lb = st.number_input("Weight (lb)", min_value=1.0, value=165.0, step=0.1)
             sex = st.selectbox("Sex", SEX_OPTIONS)
         with b:
-            height_cm = st.number_input("Height (cm)", min_value=1.0, value=175.0, step=0.1)
+            height_ft = st.number_input("Height — feet", min_value=0, max_value=9, value=5)
+            height_in = st.number_input("Height — inches", min_value=0.0, max_value=11.99, value=9.0, step=0.1)
             activity = st.selectbox("Activity level", ACTIVITY_OPTIONS, index=2)
         with c:
             age = st.number_input("Age", min_value=1, value=25, step=1)
-            goal = st.selectbox("Fitness goal", GOAL_OPTIONS)
+            goal = st.selectbox("Fitness goal", GOAL_OPTIONS,
+                                index=GOAL_OPTIONS.index(str(latest.get("goal") or "Lose").title()))
         submitted = st.form_submit_button("Calculate and save", type="primary")
     if submitted:
         try:
             result = target_service.calculate_and_save(
-                weight_kg, height_cm, age, sex, activity_value(activity), goal
+                pounds_to_kg(weight_lb), height_to_cm(height_ft, height_in), age, sex, activity_value(activity), goal
             )
-            st.success("Calculated and saved to the SQLite database.")
-            show_targets(result)
+            st.session_state["notice"] = "Your goal and daily targets are saved!"
+            st.rerun()
         except ValueError as error:
             st.error(str(error))
     latest_targets = target_service.get_saved_targets()
@@ -73,9 +90,11 @@ with history:
     if not records:
         st.info("No saved calculations. Create one in the Calculator tab.")
     else:
-        table_columns = ["id", "created_at", "goal", "weight_kg", "calories",
+        table_columns = ["id", "created_at", "goal", "Weight (lb)", "calories",
                          "protein", "carbohydrates", "fat"]
-        st.dataframe(pd.DataFrame(records)[table_columns], hide_index=True, use_container_width=True)
+        record_frame = pd.DataFrame(records)
+        record_frame["Weight (lb)"] = record_frame["weight_kg"].apply(lambda v: round(kg_to_pounds(v), 1) if pd.notna(v) else None)
+        st.dataframe(record_frame[table_columns], hide_index=True, use_container_width=True)
         chosen_id = st.selectbox(
             "Select a calculation to view, edit, or delete",
             options=[record["id"] for record in records],
@@ -94,18 +113,18 @@ with history:
                 x, y, z = st.columns(3)
                 with x:
                     edit_weight = st.number_input(
-                        "Weight (kg)", min_value=1.0,
-                        value=float(selected["weight_kg"]), step=0.1, key=f"w_{chosen_id}"
+                        "Weight (lb)", min_value=1.0,
+                        value=kg_to_pounds(selected["weight_kg"]), step=0.1, key=f"w_{chosen_id}"
                     )
                     edit_sex = st.selectbox(
                         "Sex", SEX_OPTIONS, index=SEX_OPTIONS.index(selected["sex"].capitalize()),
                         key=f"s_{chosen_id}",
                     )
                 with y:
-                    edit_height = st.number_input(
-                        "Height (cm)", min_value=1.0,
-                        value=float(selected["height_cm"]), step=0.1, key=f"h_{chosen_id}"
-                    )
+                    feet, inches = cm_to_height(selected["height_cm"])
+                    edit_feet = st.number_input("Height — feet", min_value=0, value=feet, key=f"hf_{chosen_id}")
+                    edit_inches = st.number_input("Height — inches", min_value=0.0, max_value=11.99,
+                                                  value=inches, step=0.1, key=f"hi_{chosen_id}")
                     activity_label = selected["activity_level"].replace("_", " ").title()
                     edit_activity = st.selectbox(
                         "Activity level", ACTIVITY_OPTIONS,
@@ -125,18 +144,20 @@ with history:
             if update:
                 try:
                     target_service.edit_calculation(
-                        chosen_id, weight_kg=edit_weight, height_cm=edit_height,
+                        chosen_id, weight_kg=pounds_to_kg(edit_weight), height_cm=height_to_cm(edit_feet, edit_inches),
                         age=edit_age, sex=edit_sex,
                         activity_level=activity_value(edit_activity), goal=edit_goal,
                     )
-                    st.success("Record updated. Open this tab again to refresh values.")
+                    st.session_state["notice"] = "Calculation updated."
+                    st.rerun()
                 except ValueError as error:
                     st.error(str(error))
         confirm = st.checkbox("I understand deleting this record cannot be undone.",
                               key=f"confirm_delete_{chosen_id}")
-    if st.button("Delete selected calculation", disabled=not confirm) and target_service.delete_calculation(chosen_id):
-        st.success("Record deleted.")
-    st.rerun()
+        if st.button("Delete selected calculation", disabled=not confirm):
+            target_service.delete_calculation(chosen_id)
+            st.session_state["notice"] = "Calculation deleted."
+            st.rerun()
 
 with daily_log:
     st.subheader("Daily intake and weight")
@@ -145,19 +166,21 @@ with daily_log:
         log_date = st.date_input("Date", value=date.today())
         x, y = st.columns(2)
         with x:
-            logged_weight = st.number_input("Weight (kg)", min_value=0.1, value=75.0, step=0.1)
+            logged_weight = st.number_input("Weight (lb)", min_value=0.1, value=165.0, step=0.1)
         with y:
             calories_eaten = st.number_input("Calories consumed", min_value=0, value=2000, step=50)
         save_log = st.form_submit_button("Save daily entry", type="primary")
     if save_log:
         try:
-            progress_service.save_daily_log(log_date, logged_weight, calories_eaten)
+            progress_service.save_daily_log(log_date, pounds_to_kg(logged_weight), calories_eaten)
             st.success(f"Daily entry for {log_date} saved.")
         except ValueError as error:
             st.error(str(error))
     logs = progress_service.list_daily_logs()
     if logs:
-        st.dataframe(pd.DataFrame(logs), use_container_width=True, hide_index=True)
+        log_frame = pd.DataFrame(logs)
+        log_frame["Weight (lb)"] = log_frame.pop("weight_kg").apply(lambda v: round(kg_to_pounds(v), 1))
+        st.dataframe(log_frame.rename(columns={"log_date": "Date", "calories": "Calories"}), use_container_width=True, hide_index=True)
         delete_date = st.selectbox(
             "Select an entry date to delete", options=[log["log_date"] for log in logs]
         )
@@ -179,15 +202,16 @@ with trends:
         trend_frame = pd.DataFrame(week_logs)
         trend_frame["log_date"] = pd.to_datetime(trend_frame["log_date"])
         trend_frame = trend_frame.set_index("log_date")
-        st.markdown("#### Weight (kg)")
-        st.line_chart(trend_frame[["weight_kg"]])
+        trend_frame["Weight (lb)"] = trend_frame["weight_kg"].apply(kg_to_pounds)
+        st.markdown("#### Weight (lb)")
+        st.line_chart(trend_frame[["Weight (lb)"]], color="#168572")
         st.markdown("#### Daily calories consumed")
         st.bar_chart(trend_frame[["calories"]])
         x, y, z = st.columns(3)
         x.metric("Days logged", summary["days_logged"])
-        y.metric("Average weight", f'{summary["average_weight_kg"]} kg')
+        y.metric("Average weight", f'{kg_to_pounds(summary["average_weight_kg"]):.1f} lb')
         z.metric("Average calories", f'{summary["average_calories"]:,} kcal')
-        st.caption(f'Weight change from first to last logged day: {summary["weight_change_kg"]:+.2f} kg')
+        st.caption(f'Weight change from first to last logged day: {kg_to_pounds(summary["weight_change_kg"]):+.2f} lb')
 
 with recommendations:
     st.subheader("Rule-based progress recommendations")
