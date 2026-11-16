@@ -165,3 +165,16 @@ The original calculation slice was delivered via [PR #7](https://github.com/CMen
 - Future work: formal database migrations, backups, user profiles, clearer goal-rate thresholds, and better edit-form behavior on repeated Streamlit reruns.
 
 For the final conference demonstration, see [two-minute demo checklist](docs/MONDAY_DEMO.md).
+
+## Final interface polish
+
+The interface uses pounds and feet/inches for calculator and history inputs, and
+pounds for daily logs and trends. Conversions happen at the presentation boundary;
+existing metric database records and calculation formulas remain compatible.
+A teal theme, target cards, onboarding guidance, and saved-goal indicator clarify
+the workflow. History edits and deletions refresh immediately.
+
+`tests/test_imperial_ui.py` checks known conversions, goal persistence after reopening
+SQLite for all three goals, and the empty/save/edit/delete Streamlit workflow.
+The SQL repository in this implementation is named `TargetRepository`;
+`tests/test_sqlite_repository.py` covers its history and daily-log methods.
