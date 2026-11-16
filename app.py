@@ -129,14 +129,14 @@ with history:
                         age=edit_age, sex=edit_sex,
                         activity_level=activity_value(edit_activity), goal=edit_goal,
                     )
-                    st.success("Record updated. Open this tab again to refresh values.")
+                    st.rerun()
                 except ValueError as error:
                     st.error(str(error))
         confirm = st.checkbox("I understand deleting this record cannot be undone.",
                               key=f"confirm_delete_{chosen_id}")
-    if st.button("Delete selected calculation", disabled=not confirm) and target_service.delete_calculation(chosen_id):
-        st.success("Record deleted.")
-    st.rerun()
+        if (st.button("Delete selected calculation", disabled=not confirm)
+                and target_service.delete_calculation(chosen_id)):
+            st.rerun()
 
 with daily_log:
     st.subheader("Daily intake and weight")
