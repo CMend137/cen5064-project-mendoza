@@ -34,21 +34,58 @@ def show_targets(targets):
 
 
 st.markdown("""<style>
-.block-container {max-width: 1200px; padding-top: 2rem;}
-[data-testid="stMetric"] {background: #edf7f5; border: 1px solid #b9ded7;
- border-radius: 14px; padding: 18px; color: #153c36;}
-[data-testid="stMetricLabel"], [data-testid="stMetricValue"] {color: #153c36;}
-[data-testid="stForm"] {border-radius: 16px; padding: 24px;}
+.stApp {background: #0b1120; color: #e6edf7;}
+.block-container {max-width: 1240px; padding-top: 2rem;}
+[data-testid="stHeader"] {background: #0b1120;}
+[data-testid="stMetric"] {background: #172338; border: 1px solid #33445e;
+ border-top: 3px solid #60a5fa; border-radius: 14px; padding: 18px;}
+[data-testid="stMetricLabel"] {color: #bac9dd;}
+[data-testid="stMetricValue"] {color: #f4f7fc;}
+[data-testid="stForm"] {background: #111c2e; border: 1px solid #33445e;
+ border-radius: 18px; padding: 24px;}
+[data-baseweb="tab-list"] {gap: 8px; padding: 8px; background: #111c2e;
+ border-radius: 12px; overflow-x: auto;}
+[data-baseweb="tab"] {padding: 10px 16px; border-radius: 8px; color: #c5d3e6;}
+[data-baseweb="tab"][aria-selected="true"] {background: #233c62; color: #ffffff;}
 h1, h2, h3 {letter-spacing: -0.025em;}
+.mm-hero {background: linear-gradient(115deg, #172b4d, #1c2341);
+ border: 1px solid #3c5278; border-radius: 22px; padding: 30px; margin-bottom: 24px;}
+.mm-hero h1 {color: #ffffff; margin: 8px 0; font-size: clamp(2rem, 5vw, 3rem);}
+.mm-hero p {color: #c5d3e6; margin: 0;}
+.mm-eyebrow {color: #93c5fd; font-size: .8rem; font-weight: 700; letter-spacing: .16em;}
+@media (max-width: 640px) {
+ .block-container {padding: 1rem;} .mm-hero {padding: 20px;}
+ [data-testid="stForm"] {padding: 16px;}
+}
 </style>""", unsafe_allow_html=True)
-st.title("📊 MacroMetric")
-st.caption("Nutrition target planning, calculation history, and daily progress in one place.")
-st.caption("Start with Calculator, record your day in Daily Log, then explore your weekly trends.")
+st.markdown("""<section class="mm-hero">
+<div class="mm-eyebrow">PLAN • TRACK • UNDERSTAND</div>
+<h1>MacroMetric</h1>
+<p>Your nutrition targets. Your daily progress. One clear view.</p>
+</section>""", unsafe_allow_html=True)
 if "notice" in st.session_state:
     st.success(st.session_state.pop("notice"))
 saved_records = target_service.list_calculations()
 latest = saved_records[0] if saved_records else {}
 st.caption(f"Saved goal: {str(latest.get('goal') or 'Not set').title()} · Measurements in lb and ft/in")
+with st.container(border=True):
+    st.subheader("Your day at a glance")
+    today_log = next((row for row in progress_service.list_daily_logs()
+                      if row["log_date"] == date.today().isoformat()), None)
+    daily_target = latest.get("calories")
+    consumed = today_log["calories"] if today_log else None
+    a, b, c = st.columns(3)
+    a.metric("Daily target", f"{daily_target:,} kcal" if daily_target else "Not set")
+    b.metric("Logged today", f"{consumed:,} kcal" if consumed is not None else "No entry")
+    if consumed is not None and daily_target:
+        remaining = daily_target - consumed
+        c.metric("Above target" if remaining < 0 else "Remaining", f"{abs(remaining):,} kcal")
+        ratio = consumed / daily_target
+        st.progress(min(max(ratio, 0.0), 1.0), text=f"{ratio:.0%} of daily calorie target logged")
+    else:
+        c.metric("Days logged this week", f"{len(progress_service.weekly_logs())} / 7")
+        st.caption("Save a target in Calculator and an entry for today in Daily Log to see your calorie progress.")
+
 calculator, history, daily_log, trends, recommendations = st.tabs(
     ["Calculator", "Calculation History", "Daily Log", "Weekly Trends", "Recommendations"]
 )
@@ -176,7 +213,8 @@ with daily_log:
     if save_log:
         try:
             progress_service.save_daily_log(log_date, pounds_to_kg(logged_weight), calories_eaten)
-            st.success(f"Daily entry for {log_date} saved.")
+            st.session_state["notice"] = f"Daily entry for {log_date} saved."
+            st.rerun()
         except ValueError as error:
             st.error(str(error))
     logs = progress_service.list_daily_logs()
@@ -207,9 +245,9 @@ with trends:
         trend_frame = trend_frame.set_index("log_date")
         trend_frame["Weight (lb)"] = trend_frame["weight_kg"].apply(kg_to_pounds)
         st.markdown("#### Weight (lb)")
-        st.line_chart(trend_frame[["Weight (lb)"]], color="#168572")
+        st.line_chart(trend_frame[["Weight (lb)"]], color="#60a5fa")
         st.markdown("#### Daily calories consumed")
-        st.bar_chart(trend_frame[["calories"]])
+        st.bar_chart(trend_frame[["calories"]], color="#a78bfa")
         x, y, z = st.columns(3)
         x.metric("Days logged", summary["days_logged"])
         y.metric("Average weight", f'{kg_to_pounds(summary["average_weight_kg"]):.1f} lb')

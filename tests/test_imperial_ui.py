@@ -61,3 +61,18 @@ def test_ui_displays_invalid_measurement_errors(tmp_path, monkeypatch):
     assert not app.exception
     assert '3 ft 0 in to 8 ft 0 in' in app.error[0].value
     assert TargetRepository().list_records() == []
+
+
+@pytest.mark.parametrize('consumed, label', [(0, 'Remaining'), (3000, 'Above target')])
+def test_today_dashboard_tracks_saved_intake(tmp_path, monkeypatch, consumed, label):
+    from datetime import date
+
+    original = TargetRepository.__init__
+    monkeypatch.setattr(TargetRepository, '__init__', lambda self: original(self, tmp_path / 'ui.db'))
+    repo = TargetRepository()
+    TargetService(repo).calculate_and_save(75, 175, 30, 'Male', 'moderate', 'maintain')
+    repo.save_log(date.today().isoformat(), 75, consumed)
+    app = AppTest.from_file('../app.py').run()
+    assert not app.exception
+    assert next(m for m in app.metric if m.label == 'Logged today').value == f'{consumed:,} kcal'
+    assert next(m for m in app.metric if m.label == label).value == f'{abs(2633-consumed):,} kcal'
