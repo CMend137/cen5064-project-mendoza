@@ -1,3 +1,6 @@
+from domain.validation import validate_measurements
+
+
 def calculate_targets(
     weight_kg,
     height_cm,
@@ -11,14 +14,7 @@ def calculate_targets(
     Weight must be provided in kilograms and height in centimeters.
     """
 
-    if weight_kg <= 0:
-        raise ValueError("Weight must be greater than zero.")
-
-    if height_cm <= 0:
-        raise ValueError("Height must be greater than zero.")
-
-    if age <= 0:
-        raise ValueError("Age must be greater than zero.")
+    validate_measurements(weight_kg, height_cm, age)
 
     sex = sex.lower()
     activity_level = activity_level.lower()

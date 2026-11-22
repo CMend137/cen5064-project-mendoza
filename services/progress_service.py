@@ -3,6 +3,7 @@
 from datetime import date, timedelta
 
 from domain.progress import progress_recommendation, weekly_summary
+from domain.validation import validate_weight
 
 
 class ProgressService:
@@ -12,8 +13,7 @@ class ProgressService:
     def save_daily_log(self, log_date, weight_kg, calories):
         # Validate before any database writes.
         date.fromisoformat(str(log_date))
-        if weight_kg <= 0:
-            raise ValueError("Weight must be greater than zero.")
+        validate_weight(weight_kg)
         if calories < 0:
             raise ValueError("Calorie intake cannot be negative.")
         self.repository.save_log(str(log_date), float(weight_kg), int(calories))
