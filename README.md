@@ -15,7 +15,7 @@ MacroMetric is a local nutrition target and progress application, built in Pytho
 3. **View** weight and calorie trends over the last seven days, including weekly averages.
 4. **Receive** simple, transparent, rule-based feedback based on recent weight changes and saved goal.
 
-The application also stores **every calculation**, instead of overwriting the last one. Users can view the full history, edit a saved calculation (which reruns domain logic), or delete it. The interface is organized into five tabs: Calculator, Calculation History, Daily Log, Weekly Trends, and Recommendations.
+The application also stores **every calculation**, instead of overwriting the last one. Users can view the full history, edit a saved calculation (which reruns domain logic), or delete it. The interface is organized into five tabs: Calculator, History, Daily Log, Trends, and Insights.
 
 ## Run from a clean clone
 
@@ -46,10 +46,10 @@ Open the local Streamlit URL (typically `http://localhost:8501`). SQLite creates
 ### Demonstrate the app
 
 1. **Calculator:** enter valid measurements, choose an activity level and goal, then save a calculation. Change the goal and save again.
-2. **Calculation History:** see both records, select one, edit the measurements or goal, and save. Delete the other using the confirmation checkbox.
+2. **History:** see both records, select one, edit the measurements or goal, and save. Delete the other using the confirmation checkbox.
 3. **Daily Log:** enter a date, weight, and calories consumed. Save a second date. To edit an entry, select the same date and save revised values.
-4. **Weekly Trends:** review weight and calorie charts and summary metrics. These show only logs from the last seven days (including today).
-5. **Recommendations:** see rules associated with the most recent saved fitness goal and last seven days of logs.
+4. **Trends:** review weight and calorie charts and summary metrics. These show only logs from the last seven days (including today).
+5. **Insights:** see rules associated with the most recent saved fitness goal and last seven days of logs.
 
 For a classroom demo, use fictional values and dates within the last seven days. No personal data needs to be stored or uploaded.
 
@@ -166,7 +166,7 @@ The original calculation slice was delivered via [PR #7](https://github.com/CMen
 
 ## Final video walkthrough
 
-Before recording, save two fictional daily logs dated within the past week. Start the recording on Calculator and save a target. Change the goal, save again, and open Calculation History to show both results. In Daily Log, enter today’s weight and calories. Open Weekly Trends and point out how today’s entry affects the weekly average. Finish on Recommendations and explain the feedback shown for the latest saved goal.
+For the required 3–5 minute screen recording, save two fictional daily logs dated within the past week. Start the recording on Calculator and save a target. Change the goal, save again, and open History to show both results. In Daily Log, enter today’s weight and calories. Open Trends and point out how today’s entry affects the weekly average. Finish on Insights and explain the feedback shown for the latest saved goal.
 
 The [November 9 conference checklist](docs/MONDAY_DEMO.md) documents the earlier project checkpoint.
 
@@ -175,7 +175,7 @@ The [November 9 conference checklist](docs/MONDAY_DEMO.md) documents the earlier
 The interface uses pounds and feet/inches for calculator and history inputs, and
 pounds for daily logs and trends. Conversions happen at the presentation boundary;
 existing metric database records and calculation formulas remain compatible.
-A teal theme, target cards, onboarding guidance, and saved-goal indicator clarify
+A dark blue theme, target cards, onboarding guidance, and saved-goal indicator clarify
 the workflow. History edits and deletions refresh immediately.
 
 `tests/test_imperial_ui.py` checks known conversions, goal persistence after reopening
