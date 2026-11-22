@@ -164,7 +164,11 @@ The original calculation slice was delivered via [PR #7](https://github.com/CMen
 - The seven-day trend is based on recorded dates. On days with no entry, there is no estimate or interpolated value. Rule-based weight change is measured between the first and last logged dates, which may be fewer than seven days apart.
 - Future work: formal database migrations, backups, user profiles, clearer goal-rate thresholds, and better edit-form behavior on repeated Streamlit reruns.
 
-For the final conference demonstration, see [two-minute demo checklist](docs/MONDAY_DEMO.md).
+## Final video walkthrough
+
+Before recording, save two fictional daily logs dated within the past week. Start the recording on Calculator and save a target. Change the goal, save again, and open Calculation History to show both results. In Daily Log, enter today’s weight and calories. Open Weekly Trends and point out how today’s entry affects the weekly average. Finish on Recommendations and explain the feedback shown for the latest saved goal.
+
+The [November 9 conference checklist](docs/MONDAY_DEMO.md) documents the earlier project checkpoint.
 
 ## Final interface polish
 
